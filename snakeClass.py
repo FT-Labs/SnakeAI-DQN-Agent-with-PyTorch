@@ -158,6 +158,7 @@ class SnakeGameAI:
         return False
 
     def updateUi(self):
+
         # Fill the background with black color
         self.display.fill(BLACK)
 
@@ -178,17 +179,37 @@ class SnakeGameAI:
 
 
     def moveSnake(self, dir):
+
+        clockWise = [Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN]
+        idx = clockWise.index(self.direction)
+
+
+        if np.array_equal(dir, [1, 0, 0]):
+            # No changes
+            newDir = clockWise[idx]
+        elif np.array_equal(dir, [0, 1, 0]):
+            nextIdx = (idx + 1) % 4
+            # Take a right turn
+            newDir = clockWise[nextIdx]
+        else: #i.e [0, 0, 1]
+            nextIdx = (idx - 1) % 4
+            newDir = clockWise[nextIdx]
+
+        self.direction = newDir
+
+
+
         x = self.head.x
         y = self.head.y
 
 
-        if dir == Direction.RIGHT:
+        if self.direction == Direction.RIGHT:
             x += BLOCK_SIZE
-        elif dir == Direction.LEFT:
+        elif self.direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif dir == Direction.DOWN:
+        elif self.direction == Direction.DOWN:
             y += BLOCK_SIZE
-        elif dir == Direction.UP:
+        elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
 
         self.head = Loc(x, y)
