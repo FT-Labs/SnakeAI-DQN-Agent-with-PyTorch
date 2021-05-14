@@ -77,16 +77,17 @@ class SnakeGameAI:
 
 
 
-    def playStep(self, dir):
+    def playStep(self, dir=None):
         self.gameIter += 1
 
         #For game configurations to take action
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
 
-            if self.humanPlay:
+        if self.humanPlay:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         if self.direction != Direction.RIGHT:
@@ -147,7 +148,8 @@ class SnakeGameAI:
 
 
 
-        if loc.x > self.width - BLOCK_SIZE or loc.x < 0 or loc.y > self.height or loc.y < 0:
+
+        if loc.x > self.width - BLOCK_SIZE or loc.x < 0 or loc.y > self.height - BLOCK_SIZE or loc.y < 0:
             return True
 
         #If snake hits itself
@@ -180,22 +182,23 @@ class SnakeGameAI:
 
     def moveSnake(self, dir):
 
-        clockWise = [Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN]
+        clockWise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clockWise.index(self.direction)
 
 
-        if np.array_equal(dir, [1, 0, 0]):
-            # No changes
-            newDir = clockWise[idx]
-        elif np.array_equal(dir, [0, 1, 0]):
-            nextIdx = (idx + 1) % 4
-            # Take a right turn
-            newDir = clockWise[nextIdx]
-        else: #i.e [0, 0, 1]
-            nextIdx = (idx - 1) % 4
-            newDir = clockWise[nextIdx]
+        if not self.humanPlay:
+            if np.array_equal(dir, [1, 0, 0]):
+                # No changes
+                newDir = clockWise[idx]
+            elif np.array_equal(dir, [0, 1, 0]):
+                nextIdx = (idx + 1) % 4
+                # Take a right turn
+                newDir = clockWise[nextIdx]
+            else: #i.e [0, 0, 1]
+                nextIdx = (idx - 1) % 4
+                newDir = clockWise[nextIdx]
 
-        self.direction = newDir
+            self.direction = newDir
 
 
 
@@ -225,12 +228,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-
+    print(args.humanplay)
     snakeGame = SnakeGameAI(humanPlay=args.humanplay)
 
     #Rendering game
     while True:
-        gameOver, score = snakeGame.playStep()
+        reward, gameOver, score = snakeGame.playStep()
 
         if gameOver == True:
             break
