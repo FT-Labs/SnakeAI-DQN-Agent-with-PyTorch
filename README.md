@@ -1,6 +1,6 @@
 ## Deep Q Neural Network with PyTorch Learning to Play Snake 🐍
 
-Snake game has been made with PyTorch. Main class and parameters are in "SnakeGame.py". Below illustrates a trained dqn model, which you can see it by yourself by cloning this repo and follow the instructions below.
+Snake game has been made with PyGame. Main class and parameters are in "SnakeGame.py". Below illustrates a trained dqn model, which you can see it by yourself by cloning this repo and follow the instructions below.
 
 ---
 
