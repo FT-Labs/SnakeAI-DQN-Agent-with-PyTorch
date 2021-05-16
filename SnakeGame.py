@@ -3,7 +3,7 @@ from distutils import util
 import sys
 import argparse
 import snakeClass
-import DQNAgent
+#import DQNAgent
 import config
 
 
@@ -20,6 +20,6 @@ if __name__ == "__main__":
     game = snakeClass.SnakeGameAI()
 
     if args.humanplay:
-        game.humanPlay()
-    else:
-        DQNAgent.train(game)
+        game.humanGame()
+#    else:
+#        DQNAgent.train(game)

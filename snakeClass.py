@@ -154,14 +154,14 @@ class SnakeGameAI:
 
             pygame.draw.rect(self.display, GREEN_2, pygame.Rect(point.x , point.y , config.BLOCK_SIZE, config.BLOCK_SIZE), 3)
 
-            appleRect = apple.get_rect(topleft=(self.food.x, self.food.y))
-            #pygame.blit(self.display, RED, pygame.Rect(self.food.x, self.food.y, config.BLOCK_SIZE, config.BLOCK_SIZE))
-            self.display.blit(apple, appleRect)
 
-            txt = font.render(f"SCORE: {self.score}", True, WHITE)
-            self.display.blit(txt, [0, 0])
-            pygame.display.flip()
+        appleRect = apple.get_rect(topleft=(self.food.x, self.food.y))
+        #pygame.blit(self.display, RED, pygame.Rect(self.food.x, self.food.y, config.BLOCK_SIZE, config.BLOCK_SIZE))
+        self.display.blit(apple, appleRect)
 
+        txt = font.render(f"SCORE: {self.score}", True, WHITE)
+        self.display.blit(txt, [0, 0])
+        pygame.display.flip()
 
 
     def moveSnake(self, dir):
@@ -202,26 +202,16 @@ class SnakeGameAI:
         self.head = config.Loc(x, y)
 
 
+    def humanGame(self):
+        self.humanPlay = True
 
-def humanGame(snakeGame):
-    snakeGame = SnakeGameAI(humanPlay=True)
+        #Rendering game
+        while True:
+            reward, gameOver, score = self.playStep()
 
+            if gameOver == True:
+                break
 
-    #Rendering game
-    while True:
-        reward, gameOver, score = snakeGame.playStep()
+        print(f"Final Score: {score}")
 
-        if gameOver == True:
-            break
-
-    print(f"Final Score: {score}")
-
-    pygame.quit()
-
-
-def displayOptions():
-    print("""
-Options:
-    --humanplay, default=true
-    --speed, default={}
-""".format(config.BLOCK_SIZE))
+        pygame.quit()
