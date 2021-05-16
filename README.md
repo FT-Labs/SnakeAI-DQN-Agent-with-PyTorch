@@ -5,7 +5,7 @@ Snake game has been made with PyTorch. Main class and parameters are in "SnakeGa
 ---
 
 
-![alt text](https://github.com/ardaPhysTech/SnakeAI-DQN-Agent-With-PyTorch/gif/snakeai.gif "Snake AI")
+![alt text](https://github.com/ardaPhysTech/SnakeAI-DQN-Agent-With-PyTorch/blob/feature/snakeai/gif/snakeai.gif "Snake AI")
 ---
 #### Global parameters
 Since some of the classes use the same parameters, like BLOCK_SIZE (size of each block of the snake) and SPEED (game speed), these global variables have been written in a config file "config.py".
