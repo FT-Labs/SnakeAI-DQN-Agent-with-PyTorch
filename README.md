@@ -47,9 +47,9 @@ If game does not run on your computer or give module errors, just pip install al
 * matplotlib
 * torch
 * torchvision
-* pandas
+* numpy
 * json
 * pygame
 * ipython
 
-E.g: ``` pip install matplotlib pandas ... ```
+E.g: ``` pip install matplotlib numpy ... ```
