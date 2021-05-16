@@ -1,0 +1,1 @@
+{"numberOfGames": 106, "record": 68, "layers": "Linear(in_features=11, out_features=256, bias=True)\nLinear(in_features=256, out_features=3, bias=True)"}

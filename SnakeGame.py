@@ -4,8 +4,8 @@ import sys
 import argparse
 import snakeClass
 import DQNAgent
+import json
 import config
-
 
 
 if __name__ == "__main__":
@@ -16,6 +16,7 @@ if __name__ == "__main__":
 #    parser.add_argument("--help", nargs='?', type=distutils.util.strtobool, default=False)
     args = parser.parse_args()
     config.SPEED = args.speed
+    config.LoadScores()
 
     game = snakeClass.SnakeGameAI()
 

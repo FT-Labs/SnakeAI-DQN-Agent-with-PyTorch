@@ -3,6 +3,7 @@
 import pygame
 import numpy as np
 import config
+import sys
 
 
 pygame.init()
@@ -66,25 +67,26 @@ class SnakeGameAI:
 
         #For game configurations to take action
 
-        if self.humanPlay:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        for event in pygame.event.get():
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        if self.direction != config.Direction.RIGHT:
-                            self.direction = config.Direction.LEFT
-                    elif event.key == pygame.K_RIGHT:
-                        if self.direction != config.Direction.LEFT:
-                            self.direction = config.Direction.RIGHT
-                    elif event.key == pygame.K_UP:
-                        if self.direction != config.Direction.DOWN:
-                            self.direction = config.Direction.UP
-                    elif event.key == pygame.K_DOWN:
-                        if self.direction != config.Direction.UP:
-                            self.direction = config.Direction.DOWN
+                    if self.humanPlay:
+                        if event.key == pygame.K_LEFT:
+                            if self.direction != config.Direction.RIGHT:
+                                self.direction = config.Direction.LEFT
+                        elif event.key == pygame.K_RIGHT:
+                            if self.direction != config.Direction.LEFT:
+                                self.direction = config.Direction.RIGHT
+                        elif event.key == pygame.K_UP:
+                            if self.direction != config.Direction.DOWN:
+                                self.direction = config.Direction.UP
+                        elif event.key == pygame.K_DOWN:
+                            if self.direction != config.Direction.UP:
+                                self.direction = config.Direction.DOWN
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        sys.exit()
+
 
 
         # Moving the snake (i.e. Updating the head direction of snake)

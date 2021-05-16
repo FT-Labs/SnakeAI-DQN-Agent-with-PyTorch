@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch import optim
 import torch.nn.functional as fnc
 import os
+import sys
 
 
 #Inherit from torch nn module
@@ -14,6 +15,7 @@ class LinearQNet(nn.Module):
         super().__init__()
         self.model_layers = nn.ModuleList()
         self.initiliazeLayers(input_size, hidden_size, output_size)
+        self.loadModel()
 
 
 
@@ -22,13 +24,13 @@ class LinearQNet(nn.Module):
         for i in range(len(hidden_size)+1):
             if i == 0:
                 layer = nn.Linear(input_size,hidden_size[i])
-            elif i < len(hidden_size)-1:
-                layer = nn.Linear(hidden_size[i], hidden_size[i+1])
+            elif i != len(hidden_size):
+                layer = nn.Linear(hidden_size[i-1], hidden_size[i])
             else:
                 layer = nn.Linear(hidden_size[i-1], output_size)
 
-
             self.model_layers.append(layer)
+
 
     def forward(self, x):
 
@@ -44,8 +46,18 @@ class LinearQNet(nn.Module):
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
-            file_name = os.path.join(model_folder_path, file_name)
-            torch.save(self.state_dict(), file_name)
+        file_name = os.path.join(model_folder_path, file_name)
+        torch.save(self.state_dict(), file_name)
+
+
+    def loadModel(self, file_name='model.pth'):
+        model_folder_path = "./model"
+        try :
+                self.load_state_dict(torch.load(os.path.join(model_folder_path, file_name)), strict=False)
+                self.eval()
+                print("Model loaded succesfully")
+        except Exception as e:
+            print(e)
 
 
 class Qtrainer:

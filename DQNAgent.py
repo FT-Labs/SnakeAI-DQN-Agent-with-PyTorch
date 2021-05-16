@@ -7,6 +7,7 @@ from collections import deque
 from model import LinearQNet, Qtrainer
 from plotter import plot
 import config
+import os
 
 
 # Constant parameters for DQN
@@ -19,11 +20,11 @@ class DQNAgent:
 
     def __init__(self, hiddenLayers):
         self.hiddenLayers = hiddenLayers
-        self.noOfGames = 0
+        self.noOfGames = config.NO_OF_GAMES
         #To controlling randomness of the game
         self.epsilon = 0
         #Discount rate for agent, needs to be smaller than 1
-        self.gamma = 0.89
+        self.gamma = 0.9
         #Using deque data structure for memory allocation
         #If memory is exceeded, deque will pop front to conserve memory
         self.memory = deque(maxlen=MAX_MEMORY)
@@ -158,8 +159,9 @@ def train(snakeGame):
             agent.noOfGames += 1
             agent.trainWithLongMemory()
 
-            if score > record:
-                record = score
+            if score > config.RECORD:
+                print("MODEL SAVED")
+                config.SaveScores(agent.noOfGames, score, agent.model.model_layers)
                 agent.model.saveModel()
 
 
