@@ -1,13 +1,8 @@
 #!/usr/bin/python
 
 import pygame
-import distutils
-from distutils import util
-import sys
-import argparse
 import numpy as np
-from enum import Enum
-from collections import namedtuple
+import config
 
 
 pygame.init()
@@ -16,14 +11,6 @@ apple = pygame.image.load("./Assets/apple1.png")
 appleRect = apple.get_rect()
 
 
-class Direction(Enum):
-    UP = 1
-    DOWN = 2
-    RIGHT = 3
-    LEFT = 4
-
-
-Loc = namedtuple("location", "x, y")
 
 #RGB Color for blocks
 WHITE = (255, 255, 255)
@@ -32,9 +19,6 @@ GREEN_1 = (0, 255, 0)
 GREEN_2 = (0, 0, 0)
 BLACK = (0, 0, 0)
 
-BLOCK_SIZE = 32
-SPEED = 16
-STOP_ITER = 100
 
 class SnakeGameAI:
 
@@ -54,10 +38,10 @@ class SnakeGameAI:
     def reset(self):
 
         #Initiliazing game state
-        self.direction = Direction.RIGHT
+        self.direction = config.Direction.RIGHT
 
-        self.head = Loc(self.width/2, self.height/2)
-        self.snake = [self.head, Loc(self.head.x - BLOCK_SIZE, self.head.y),Loc(self.head.x - (2 * BLOCK_SIZE), self.head.y)]
+        self.head = config.Loc(self.width/2, self.height/2)
+        self.snake = [self.head, config.Loc(self.head.x - config.BLOCK_SIZE, self.head.y),config.Loc(self.head.x - (2 * config.BLOCK_SIZE), self.head.y)]
 
         self.score = 0
         self.food = None
@@ -68,10 +52,10 @@ class SnakeGameAI:
 
 
     def placeFood(self):
-        x = np.random.randint(0, (self.width - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
-        y = np.random.randint(0, (self.height - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+        x = np.random.randint(0, (self.width - config.BLOCK_SIZE) // config.BLOCK_SIZE) * config.BLOCK_SIZE
+        y = np.random.randint(0, (self.height - config.BLOCK_SIZE) // config.BLOCK_SIZE) * config.BLOCK_SIZE
 
-        self.food = Loc(x, y)
+        self.food = config.Loc(x, y)
         if self.food in self.snake:
             self.placeFood()
 
@@ -90,17 +74,17 @@ class SnakeGameAI:
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
-                        if self.direction != Direction.RIGHT:
-                            self.direction = Direction.LEFT
+                        if self.direction != config.Direction.RIGHT:
+                            self.direction = config.Direction.LEFT
                     elif event.key == pygame.K_RIGHT:
-                        if self.direction != Direction.LEFT:
-                            self.direction = Direction.RIGHT
+                        if self.direction != config.Direction.LEFT:
+                            self.direction = config.Direction.RIGHT
                     elif event.key == pygame.K_UP:
-                        if self.direction != Direction.DOWN:
-                            self.direction = Direction.UP
+                        if self.direction != config.Direction.DOWN:
+                            self.direction = config.Direction.UP
                     elif event.key == pygame.K_DOWN:
-                        if self.direction != Direction.UP:
-                            self.direction = Direction.DOWN
+                        if self.direction != config.Direction.UP:
+                            self.direction = config.Direction.DOWN
 
 
         # Moving the snake (i.e. Updating the head direction of snake)
@@ -118,7 +102,7 @@ class SnakeGameAI:
         reward = 0
         gameOver = False
 
-        if self.onCollisionEnter2D() or (self.humanPlay == False and self.gameIter > STOP_ITER * len(self.snake)):
+        if self.onCollisionEnter2D() or (self.humanPlay == False and self.gameIter > config.STOP_ITER * len(self.snake)):
             gameOver = True
             reward = -10
             return reward, gameOver, self.score
@@ -135,7 +119,7 @@ class SnakeGameAI:
         # Update ui (visuals) and game clock
 
         self.updateUi()
-        self.clock.tick(SPEED)
+        self.clock.tick(config.SPEED)
 
         # Return game over (boolean) and current game score
         return reward, gameOver, self.score
@@ -144,12 +128,12 @@ class SnakeGameAI:
         #Check if snake is on the boundary (i.e. wall is hit by snake)
 
         if loc is None:
-            loc = self.head
+            loc = config.Loc(self.head.x, self.head.y)
 
 
 
 
-        if loc.x > self.width - BLOCK_SIZE or loc.x < 0 or loc.y > self.height - BLOCK_SIZE or loc.y < 0:
+        if loc.x > self.width - config.BLOCK_SIZE or loc.x < 0 or loc.y > self.height - config.BLOCK_SIZE or loc.y < 0:
             return True
 
         #If snake hits itself
@@ -166,12 +150,12 @@ class SnakeGameAI:
 
 
         for point in self.snake:
-            pygame.draw.rect(self.display, GREEN_1, pygame.Rect(point.x, point.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(self.display, GREEN_1, pygame.Rect(point.x, point.y, config.BLOCK_SIZE, config.BLOCK_SIZE))
 
-            pygame.draw.rect(self.display, GREEN_2, pygame.Rect(point.x , point.y , BLOCK_SIZE, BLOCK_SIZE), 3)
+            pygame.draw.rect(self.display, GREEN_2, pygame.Rect(point.x , point.y , config.BLOCK_SIZE, config.BLOCK_SIZE), 3)
 
             appleRect = apple.get_rect(topleft=(self.food.x, self.food.y))
-            #pygame.blit(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+            #pygame.blit(self.display, RED, pygame.Rect(self.food.x, self.food.y, config.BLOCK_SIZE, config.BLOCK_SIZE))
             self.display.blit(apple, appleRect)
 
             txt = font.render(f"SCORE: {self.score}", True, WHITE)
@@ -182,7 +166,7 @@ class SnakeGameAI:
 
     def moveSnake(self, dir):
 
-        clockWise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
+        clockWise = [config.Direction.RIGHT, config.Direction.DOWN, config.Direction.LEFT, config.Direction.UP]
         idx = clockWise.index(self.direction)
 
 
@@ -206,29 +190,22 @@ class SnakeGameAI:
         y = self.head.y
 
 
-        if self.direction == Direction.RIGHT:
-            x += BLOCK_SIZE
-        elif self.direction == Direction.LEFT:
-            x -= BLOCK_SIZE
-        elif self.direction == Direction.DOWN:
-            y += BLOCK_SIZE
-        elif self.direction == Direction.UP:
-            y -= BLOCK_SIZE
+        if self.direction == config.Direction.RIGHT:
+            x += config.BLOCK_SIZE
+        elif self.direction == config.Direction.LEFT:
+            x -= config.BLOCK_SIZE
+        elif self.direction == config.Direction.DOWN:
+            y += config.BLOCK_SIZE
+        elif self.direction == config.Direction.UP:
+            y -= config.BLOCK_SIZE
 
-        self.head = Loc(x, y)
-
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--humanplay", nargs='?', type=distutils.util.strtobool, default=False)
-    parser.add_argument("--speed", nargs='?', type=int, default=BLOCK_SIZE)
-#    parser.add_argument("--help", nargs='?', type=distutils.util.strtobool, default=False)
-    args = parser.parse_args()
+        self.head = config.Loc(x, y)
 
 
-    snakeGame = SnakeGameAI(humanPlay=args.humanplay)
+
+def humanGame(snakeGame):
+    snakeGame = SnakeGameAI(humanPlay=True)
+
 
     #Rendering game
     while True:
@@ -247,4 +224,4 @@ def displayOptions():
 Options:
     --humanplay, default=true
     --speed, default={}
-""".format(BLOCK_SIZE))
+""".format(config.BLOCK_SIZE))

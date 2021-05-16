@@ -2,8 +2,11 @@
 
 import torch
 import numpy as np
+import random
 from collections import deque
-from snakeClass import SnakeGameAI, Direction, Loc, BLOCK_SIZE
+from model import LinearQNet, Qtrainer
+from plotter import plot
+import config
 
 
 # Constant parameters for DQN
@@ -14,32 +17,33 @@ LEARNING_RATE = 0.001
 
 class DQNAgent:
 
-    def __init__(self):
+    def __init__(self, hiddenLayers):
+        self.hiddenLayers = hiddenLayers
         self.noOfGames = 0
         #To controlling randomness of the game
         self.epsilon = 0
-        #Discount rate for agent
-        self.gamma = 0
+        #Discount rate for agent, needs to be smaller than 1
+        self.gamma = 0.89
         #Using deque data structure for memory allocation
         #If memory is exceeded, deque will pop front to conserve memory
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = None
-        self.trainer = None
+        self.model = LinearQNet(11, hiddenLayers, 3)
+        self.trainer = Qtrainer(self.model, LEARNING_RATE, self.gamma)
 
 
 
 
     def getState(self, snakeGame):
-        head = snakeGame.head[0]
-        pointLeft = Loc(head.x - BLOCK_SIZE, head.y)
-        pointRight = Loc(head.x + BLOCK_SIZE, head.y)
-        pointDown = Loc(head.x, head.y + BLOCK_SIZE)
-        pointUp = Loc(head.x, head.y - BLOCK_SIZE)
+        head = snakeGame.snake[0]
+        pointLeft = config.Loc(head.x - config.BLOCK_SIZE, head.y)
+        pointRight = config.Loc(head.x + config.BLOCK_SIZE, head.y)
+        pointDown = config.Loc(head.x, head.y + config.BLOCK_SIZE)
+        pointUp = config.Loc(head.x, head.y - config.BLOCK_SIZE)
 
-        dirLeft = snakeGame.direction == Direction.LEFT
-        dirRight = snakeGame.direction == Direction.RIGHT
-        dirUp = snakeGame.direction == Direction.UP
-        dirDown = snakeGame.direction == Direction.DOWN
+        dirLeft = snakeGame.direction == config.Direction.LEFT
+        dirRight = snakeGame.direction == config.Direction.RIGHT
+        dirUp = snakeGame.direction == config.Direction.UP
+        dirDown = snakeGame.direction == config.Direction.DOWN
 
 
         state = [
@@ -49,16 +53,16 @@ class DQNAgent:
                 (dirDown and snakeGame.onCollisionEnter2D(pointDown)),
 
                 #Danger from right
-                (dirRight and snakeGame.onCollisionEnter2D(dirDown)) or
-                (dirLeft and snakeGame.onCollisionEnter2D(dirUp)) or
-                (dirUp and snakeGame.onCollisionEnter2D(dirRight)) or
-                (dirDown and snakeGame.onCollisionEnter2D(dirLeft)),
+                (dirRight and snakeGame.onCollisionEnter2D(pointDown)) or
+                (dirLeft and snakeGame.onCollisionEnter2D(pointUp)) or
+                (dirUp and snakeGame.onCollisionEnter2D(pointRight)) or
+                (dirDown and snakeGame.onCollisionEnter2D(pointLeft)),
 
                 #Danger from left
-                (dirRight and snakeGame.onCollisionEnter2D(dirUp)) or
-                (dirLeft and snakeGame.onCollisionEnter2D(dirDown)) or
-                (dirUp and snakeGame.onCollisionEnter2D(dirLeft)) or
-                (dirDown and snakeGame.onCollisionEnter2D(dirRight)),
+                (dirRight and snakeGame.onCollisionEnter2D(pointUp)) or
+                (dirLeft and snakeGame.onCollisionEnter2D(pointDown)) or
+                (dirUp and snakeGame.onCollisionEnter2D(pointLeft)) or
+                (dirDown and snakeGame.onCollisionEnter2D(pointRight)),
 
                 #Move direction
                 dirLeft, dirRight, dirUp, dirDown,
@@ -81,7 +85,7 @@ class DQNAgent:
 
     def trainWithLongMemory(self):
         if len(self.memory) > BATCH_SIZE:
-            miniSampleBatch = np.random.choice(self.memory, BATCH_SIZE) # List of tuples
+            miniSampleBatch = random.sample(self.memory, BATCH_SIZE) # List of tuples
         else:
             miniSampleBatch = self.memory
 
@@ -107,11 +111,11 @@ class DQNAgent:
         finalMove = [0, 0, 0]
 
         if np.random.randint(0, 200) < self.epsilon:
-            move = np.random.randint(0, 3, size=1)
-            finalMove[move[0]] = 1
+            move = random.randint(0,2)
+            finalMove[move] = 1
         else:
             stateZ = torch.tensor(state, dtype=torch.float)
-            prediction = self.model.predict(stateZ)
+            prediction = self.model(stateZ)
             move = torch.argmax(prediction).item()
             finalMove[move] = 1
 
@@ -120,13 +124,13 @@ class DQNAgent:
 
 
 
-def train():
+def train(snakeGame):
     pltScores = list()
     pltMeanScores = list()
     totScore = 0
     record = 0
-    agent = DQNAgent()
-    snakeGame = SnakeGameAI()
+    agent = DQNAgent([256])
+    #snakeGame = SnakeGameAI()
 
     while True:
         #Get previous state
@@ -156,23 +160,12 @@ def train():
 
             if score > record:
                 record = score
-                # TODO // agent.model.save()
+                agent.model.saveModel()
+
 
             print(f"Game: {agent.noOfGames} | Score: {score} | Record: {record}")
-
-            #TODO // plot
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    train()
+            pltScores.append(score)
+            totScore += score
+            meanScore = totScore / agent.noOfGames
+            pltMeanScores.append(meanScore)
+            plot(pltScores, pltMeanScores)
